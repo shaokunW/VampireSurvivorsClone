@@ -15,7 +15,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Game Portrait/Main Menu Portrait.unity
     guid: 48ecbd23b19ed144ea9af9ed85b6b0d4
   - enabled: 1
-    path: Assets/Scenes/Game Portrait/Level 1 Portait.unity
+    path: Assets/Scenes/Game Portrait/Level 1 Portrait.unity
     guid: 13f9cce6bdccd5a4eb116b0adcbfb4f0
   m_configObjects:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 07486cfdaea28482cba34c2dc89d30df, type: 2}

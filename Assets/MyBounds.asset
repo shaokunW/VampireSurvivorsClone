@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27b39d67dd7d71c49895ca71dff2184f, type: 3}
+  m_Name: MyBounds
+  m_EditorClassIdentifier: 
+  halfWidth: 540
+  halfHeight: 960
+  backgroundSprite: {fileID: -1555269430, guid: 4a9825874034d4671b1dc9f6c8707eca, type: 3}
+  wallPrefab: {fileID: 1366335243968032619, guid: 7a8ad03691c04e549b5cbc376ff08964, type: 3}
+  extraDecorPrefab: {fileID: 0}
