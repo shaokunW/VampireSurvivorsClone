@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 namespace Vampire
@@ -25,13 +26,15 @@ namespace Vampire
 
         // 私有变量
         private Vector2 _startTouchPos; // 摇杆中心（初始触摸点）的局部坐标
-
+        [SerializeField] private UnityEvent<Vector2> onJoystickMoved;
+        [SerializeField] private UnityEvent onStartTouch, onEndTouch;
         void Start()
         {
             // 游戏开始时，默认隐藏摇杆
             if (joystickBG != null)
             {
                 joystickBG.gameObject.SetActive(false);
+                onEndTouch.Invoke();
             }
         }
 
@@ -55,7 +58,7 @@ namespace Vampire
             // TODO should use anchoredPosition
             joystickBG.localPosition = _startTouchPos;
             joystickBG.gameObject.SetActive(true);
-
+            onStartTouch.Invoke();
             // 立刻更新一次拖拽逻辑，让摇杆头在按下时就对齐
             OnDrag(eventData);
         }
@@ -84,6 +87,7 @@ namespace Vampire
 
             // 更新摇杆头的位置
             joystickHandle.anchoredPosition = clampedOffset;
+            onJoystickMoved.Invoke(clampedOffset.normalized);
         }
 
         /// <summary>
