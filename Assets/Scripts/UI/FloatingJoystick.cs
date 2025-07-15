@@ -34,7 +34,7 @@ namespace Vampire
             if (joystickBG != null)
             {
                 joystickBG.gameObject.SetActive(false);
-                onEndTouch.Invoke();
+                onEndTouch?.Invoke();
             }
         }
 
@@ -58,7 +58,7 @@ namespace Vampire
             // TODO should use anchoredPosition
             joystickBG.localPosition = _startTouchPos;
             joystickBG.gameObject.SetActive(true);
-            onStartTouch.Invoke();
+            onStartTouch?.Invoke();
             // 立刻更新一次拖拽逻辑，让摇杆头在按下时就对齐
             OnDrag(eventData);
         }
@@ -87,7 +87,7 @@ namespace Vampire
 
             // 更新摇杆头的位置
             joystickHandle.anchoredPosition = clampedOffset;
-            onJoystickMoved.Invoke(clampedOffset.normalized);
+            onJoystickMoved?.Invoke(clampedOffset.normalized);
         }
 
         /// <summary>
@@ -98,6 +98,7 @@ namespace Vampire
             // 重置所有状态
             Direction = Vector2.zero;
             joystickHandle.anchoredPosition = Vector2.zero;
+            onEndTouch?.Invoke();
             joystickBG.gameObject.SetActive(false);
         }
     }
