@@ -18,7 +18,7 @@ MonoBehaviour:
   hp: 50
   recovery: 0
   armor: 0
-  movespeed: 1
+  movespeed: 10
   luck: 1
   acceleration: 50
   walkSpriteSequence:

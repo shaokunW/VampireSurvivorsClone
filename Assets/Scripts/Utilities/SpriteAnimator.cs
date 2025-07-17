@@ -48,7 +48,8 @@ namespace Vampire
 
         public void StopAnimation(bool reset = false)
         {
-            if (reset) Setup();
+            //FIXME NULL cause stop animation fail
+            // if (reset) Setup();
             animating = false;
         }
 

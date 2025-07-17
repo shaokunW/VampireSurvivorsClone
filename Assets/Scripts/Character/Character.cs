@@ -80,6 +80,9 @@ namespace Vampire
             this.entityManager = entityManager;
             this.abilityManager = abilityManager;
             this.statsManager = statsManager;
+            spriteAnimator.Init(characterBlueprint.walkSpriteSequence, characterBlueprint.walkFrameTime, false);
+            zPositioner.Init(transform);
+
             // Add listener to increase damage dealt whenever player deals damage
             OnDealDamage.AddListener(statsManager.IncreaseDamageDealt);
             // Initialize the coroutine queue
@@ -92,7 +95,6 @@ namespace Vampire
             currentLevel = 1;
             UpdateLevelDisplay();
             // Initialize animations
-            spriteAnimator.Init(characterBlueprint.walkSpriteSequence, characterBlueprint.walkFrameTime, false);
             // Limit max speed using drag
             movementSpeed = new UpgradeableMovementSpeed();
             movementSpeed.Value = characterBlueprint.movespeed;
@@ -102,7 +104,6 @@ namespace Vampire
             armor = new UpgradeableArmor();
             armor.Value = characterBlueprint.armor;
             abilityManager.RegisterUpgradeableValue(armor, true);
-            zPositioner.Init(transform);
         }
 
         protected virtual void Update()
@@ -114,12 +115,20 @@ namespace Vampire
 
         protected virtual void FixedUpdate()
         {
+            Debug.Log($"before cal rb velocity = {rb.velocity} {characterBlueprint.movespeed} {moveDirection}");
+
             if (moveDirection != Vector2.zero)
                 lookDirection = moveDirection;
             else
                 StopWalkAnimation();
             if (alive)
-                rb.velocity += moveDirection * characterBlueprint.acceleration * Time.deltaTime;
+            {
+                rb.velocity = moveDirection * characterBlueprint.movespeed;
+                Debug.Log($"after cal rb velocity = {rb.velocity} {characterBlueprint.movespeed} {moveDirection}");
+                // rb.velocity += moveDirection * characterBlueprint.acceleration * Time.deltaTime;
+            }
+
+     
         }
 
         public void GainExp(float exp)
@@ -178,6 +187,7 @@ namespace Vampire
 
         public override void Knockback(Vector2 knockback)
         {
+            Debug.Log("Knockback");
             rb.velocity += knockback * Mathf.Sqrt(rb.drag);
         }
 
@@ -256,7 +266,7 @@ namespace Vampire
 
         public void UpdateMoveSpeed()
         {
-            rb.drag = characterBlueprint.acceleration / (movementSpeed.Value * movementSpeed.Value);
+            // rb.drag = characterBlueprint.acceleration / (movementSpeed.Value * movementSpeed.Value);
         }
 
         public void Move(Vector2 moveDirection)
@@ -271,10 +281,17 @@ namespace Vampire
             //dustParticles.Play();
         }
 
-        public void StopWalkAnimation()
+        private void StopWalkAnimation()
         {
             spriteAnimator.StopAnimating(true);
+            this.moveDirection = Vector2.zero;
             //dustParticles.Stop();
+        }
+
+        public void StopMove()
+        {
+            Debug.Log("StopMove");
+            this.moveDirection = Vector2.zero;
         }
 
         public void SetMoveDirection(InputAction.CallbackContext context)

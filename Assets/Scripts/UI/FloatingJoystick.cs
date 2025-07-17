@@ -51,7 +51,6 @@ namespace Vampire
                 clickPosition, // 当前指针的屏幕位置
                 eventData.pressEventCamera, // 渲染此Canvas的摄像机
                 out _startTouchPos); // 输出的局部坐标
-            Debug.Log($"[Floating] {clickPosition} {_startTouchPos}");
 
             // 将摇杆背景移动到点击位置，并激活它
             // startTouchPos相对parent的pivot，由于pivot不是0.5,0.5所以有偏移，简单fix使用localPosition
@@ -83,11 +82,12 @@ namespace Vampire
             Vector2 clampedOffset = Vector2.ClampMagnitude(offset, maxRadius);
 
             // 计算并设置标准化的输入方向 (-1 to 1)
+            // Todo Direction is not normalized goback use normalized value
             Direction = clampedOffset / maxRadius;
 
             // 更新摇杆头的位置
             joystickHandle.anchoredPosition = clampedOffset;
-            onJoystickMoved?.Invoke(clampedOffset.normalized);
+            onJoystickMoved?.Invoke(Direction);
         }
 
         /// <summary>
@@ -98,6 +98,7 @@ namespace Vampire
             // 重置所有状态
             Direction = Vector2.zero;
             joystickHandle.anchoredPosition = Vector2.zero;
+            onJoystickMoved?.Invoke(Direction);
             onEndTouch?.Invoke();
             joystickBG.gameObject.SetActive(false);
         }

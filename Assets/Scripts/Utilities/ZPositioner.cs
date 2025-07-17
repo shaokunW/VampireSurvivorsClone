@@ -18,6 +18,7 @@ namespace Vampire
 
         void LateUpdate()
         {
+            if (playerTransform == null) return;
             Vector3 temp = transform.position;
             temp.z = scale*((manuallySetZ ? manualY : temp.y)-playerTransform.position.y);
             transform.position = temp;
