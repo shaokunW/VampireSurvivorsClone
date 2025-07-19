@@ -45,7 +45,6 @@ namespace Vampire
         private Character playerCharacter;  // 玩家的角色
         private StatsManager statsManager;
         private Inventory inventory;
-        private InfiniteBackground infiniteBackground;
         private FastList<Monster> livingMonsters;
         private FastList<Collectable> magneticCollectables;
         public FastList<Chest> chests; 
@@ -62,11 +61,10 @@ namespace Vampire
         public AbilitySelectionDialog AbilitySelectionDialog { get; private set; }
         public SpatialHashGrid Grid { get => grid; }
 
-        public void Init(LevelBlueprint levelBlueprint, Character character, Inventory inventory, StatsManager statsManager, InfiniteBackground infiniteBackground, AbilitySelectionDialog abilitySelectionDialog)
+        public void Init(LevelBlueprint levelBlueprint, Character character, Inventory inventory, StatsManager statsManager, AbilitySelectionDialog abilitySelectionDialog)
         {
             this.playerCharacter = character;
             this.inventory = inventory;
-            this.infiniteBackground = infiniteBackground;
             this.statsManager = statsManager;
             AbilitySelectionDialog = abilitySelectionDialog;
 
@@ -127,7 +125,6 @@ namespace Vampire
         public void CollectAllCoinsAndGems()
         {
             if (shockwave != null) StopCoroutine(shockwave);
-            shockwave = StartCoroutine(infiniteBackground.Shockwave(screenDiagonalWorldSpace/2));
             foreach (Collectable collectable in magneticCollectables.ToList())
             {
                 collectable.Collect();
