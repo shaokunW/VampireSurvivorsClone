@@ -12,15 +12,24 @@ namespace Vampire
         public int slotsCount = 1;
         public float distributionRadius = 0.5f;
 
+        private int _previousSlotsCount = -1;
+        private float _previousDistributionRadius = -1.0f;
 
         public void OnValidate()
         {
 #if UNITY_EDITOR
+            if (slotsCount == _previousSlotsCount && Mathf.Approximately(distributionRadius, _previousDistributionRadius))
+            {
+                return;
+            }
             UnityEditor.EditorApplication.delayCall += () =>
             {
                 if (this != null && this.gameObject != null)
                 {
+                    Debug.Log("GenerateSlots");
                     GenerateSlots();
+                    _previousSlotsCount = slotsCount;
+                    _previousDistributionRadius = distributionRadius;
                 }
             };
 #endif

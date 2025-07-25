@@ -47,20 +47,7 @@ namespace Vampire
             {
                 Transform currentSlot = WeaponSlots[i];
                 WeaponData currentData = debugWeapons[i];
-                // 3. 实例化武器预制体
-                GameObject weaponObj = Instantiate(weaponPrefab, currentSlot.position, currentSlot.rotation, currentSlot);
-                weaponObj.name = "Weapon_" + currentData.weaponID; 
-                WeaponController wc = weaponObj.GetComponent<WeaponController>();
-                if (wc != null)
-                {
-                    Debug.Log($"wc initialized {wc} {currentSlot.name}");
-                    wc.Initialize(currentData);
-                    equippedWeapons.Add(wc); // 将初始化好的武器控制器加入管理列表
-                }
-                else
-                {
-                    Debug.LogError($"错误: 武器预制体 {weaponPrefab.name} 上没有找到WeaponController脚本!", this);
-                }
+                equippedWeapons.Add(addToSlot(currentData, currentSlot));
             }
         }
 
@@ -68,6 +55,7 @@ namespace Vampire
         {
             // 获取当前目标
             List<Transform> currentTargets = targetFinder.CurrentTargets;
+            Debug.Log($"currentTargets: {currentTargets.Count}");
             Transform currentTarget = currentTargets.FirstOrDefault();
 
             // --- 统一的武器驱动循环 ---
@@ -103,24 +91,49 @@ namespace Vampire
         /// <summary>
         /// 装备一把新武器
         /// </summary>
-        public void EquipWeapon(WeaponData weaponData, GameObject weaponPrefab)
+        public void EquipWeapon(WeaponData weaponData)
         {
             foreach (Transform slot in WeaponSlots)
             {
                 if (slot.childCount == 0)
                 {
-                    GameObject weaponObj = Instantiate(weaponPrefab, slot.position, slot.rotation, slot);
-                    WeaponController wc = weaponObj.GetComponent<WeaponController>();
-
-                    if (wc != null)
-                    {
-                        wc.Initialize(weaponData); // 初始化时不再需要传入玩家数据
-                        equippedWeapons.Add(wc);
-                    }
-
+                    equippedWeapons.Add(addToSlot(weaponData, slot));
                     return;
                 }
             }
+        }
+
+        private WeaponController addToSlot(WeaponData weapon, Transform slot)
+        {
+            // --- 调试步骤 1: 检查参数 ---
+            if (slot == null)
+            {
+                Debug.LogError("错误：尝试附加武器到的 'slot' 为空 (null)！");
+                return null; // 或者做其他错误处理
+            }
+            if (weaponPrefab == null)
+            {
+                Debug.LogError("错误：'weaponPrefab' 未在 Inspector 中指定！");
+                return null;
+            }
+
+            Debug.Log($"正在将武器附加到 '{slot.name}'...", slot.gameObject); // 点击这条日志可以在Hierarchy中高亮slot
+
+            GameObject weaponObj = Instantiate(weaponPrefab, slot.position, slot.rotation, slot);
+            weaponObj.name = "Weapon_" + weapon.weaponID;
+            // --- 调试步骤 2: 验证父子关系 ---
+            if (weaponObj.transform.parent == slot)
+            {
+                Debug.Log($"成功将 '{weaponObj.name}' 设置为 '{slot.name}' 的子物体。", weaponObj);
+            }
+            else
+            {
+                Debug.LogError($"未能将 '{weaponObj.name}' 设置为 '{slot.name}' 的子物体。当前的父物体是: " + (weaponObj.transform.parent != null ? weaponObj.transform.parent.name : "null"));
+            }
+    
+            WeaponController wc = weaponObj.GetComponent<WeaponController>();
+            wc.Initialize(weapon); 
+            return wc;
         }
 
         private void CleanWeaponSlotImmediate(Transform slot)
