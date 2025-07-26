@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Vampire
 {
@@ -14,13 +15,15 @@ namespace Vampire
         [SerializeField] private List<WeaponData> debugWeapons;
         [Tooltip("所有武器共用的基础预制体，必须挂载有WeaponController脚本")]
         [SerializeField] private GameObject weaponPrefab;
-        public List<Transform> WeaponSlots { get; set; } // 武器挂点
-        [SerializeField] private CharacterStats ownerStats;
+
+        [SerializeField] public List<Transform> WeaponSlots; // 武器挂点
+        // public CharacterStats ownerStats;
         [SerializeField] private TargetFinder targetFinder;
 
         // --- 运行时数据 ---
         public List<WeaponController> equippedWeapons = new List<WeaponController>();
-
+        
+        
         void OnValidate()
         {
 #if UNITY_EDITOR
@@ -55,7 +58,6 @@ namespace Vampire
         {
             // 获取当前目标
             List<Transform> currentTargets = targetFinder.CurrentTargets;
-            Debug.Log($"currentTargets: {currentTargets.Count}");
             Transform currentTarget = currentTargets.FirstOrDefault();
 
             // --- 统一的武器驱动循环 ---
@@ -73,19 +75,33 @@ namespace Vampire
                     // 3. 检查武器是否可以开火
                     if (weapon.CanFire())
                     {
+                        Debug.Log(("start fire"));
                         // 4. 【决策】在这里进行射程检查
-                        float finalAttackRange = weapon.Data.baseAttackRange * (1 + ownerStats.Range);
+                        float finalAttackRange = attackRange(weapon); 
                         if (Vector2.Distance(weapon.transform.position, currentTarget.position) <= finalAttackRange)
                         {
                             // 5. 【决策】在这里计算最终的冷却时间
-                            float finalFireInterval = weapon.Data.baseFireInterval / (1 + ownerStats.AttackSpeed);
-
+                            float finalFireInterval = attackSpeed(weapon);
+                            Debug.Log(("start fire"));
                             // 6. 【命令】命令武器开火，并把计算好的冷却时间传给它
                             weapon.Fire(directionToTarget, finalFireInterval);
                         }
                     }
                 }
             }
+        }
+
+        public float attackRange(WeaponController weapon)
+        {
+            return weapon.Data.baseAttackRange;
+            // return weapon.Data.baseAttackRange * (1 + ownerStats.Range);
+        }
+
+        public float attackSpeed(WeaponController weapon)
+        {
+            return weapon.Data.baseFireInterval;
+            // return weapon.Data.baseFireInterval / (1 + ownerStats.AttackSpeed);
+
         }
 
         /// <summary>

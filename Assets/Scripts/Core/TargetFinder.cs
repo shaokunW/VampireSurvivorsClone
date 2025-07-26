@@ -30,9 +30,10 @@ namespace Vampire
 
         private void FindNearestTargetsInRadius()
         {
+            Debug.Log($"start find");
             CurrentTargets.Clear();
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, searchRadius, layerMask);
-
+            Debug.Log($"colliders.Length={colliders.Length}");
             if (colliders.Length > 0)
             {
                 _priorityQueue.Clear();

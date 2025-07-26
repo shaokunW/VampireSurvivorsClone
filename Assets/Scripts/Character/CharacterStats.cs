@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace Vampire
 {
-    public class CharacterStats : MonoBehaviour
+    [Serializable]
+    public class CharacterStats
     {
         // --- 核心生存属性 ---
         [Header("核心生存属性")] protected float CurrentHealth;
@@ -21,9 +22,9 @@ namespace Vampire
         [Header("核心伤害属性 (这些值通常是百分比加成)")] [Tooltip("所有伤害的最终增伤百分比, 0.1f = +10%")]
         public float Damage;
 
-        [Tooltip("近战伤害增伤百分比")] public float MeleeDamage;
-
-        [Tooltip("远程伤害增伤百分比")] public float RangedDamage;
+        // [Tooltip("近战伤害增伤百分比")] public float MeleeDamage;
+        //
+        // [Tooltip("远程伤害增伤百分比")] public float RangedDamage;
 
         // [Tooltip("元素伤害增伤百分比")] public float ElementalDamage;
         //
@@ -53,74 +54,55 @@ namespace Vampire
 
         [Tooltip("移动速度增伤百分比, 0.1f = +10%")] public float Speed;
 
-        // --- 事件 ---
-        // 当生命值改变时触发，方便UI更新血条
-        public Action<float, float> OnHealthChanged; // 参数: 当前值, 最大值
+        //
+        // /// <summary>
+        // /// 角色受到伤害的统一处理方法
+        // /// </summary>
+        // /// <param name="rawDamage">原始伤害值</param>
+        // public void TakeDamage(float rawDamage)
+        // {
+        //     // 1. 计算闪避
+        //     if (UnityEngine.Random.value < DodgeChance)
+        //     {
+        //         Debug.Log("伤害被闪避!");
+        //         return; // 闪避成功，不承受伤害
+        //     }
+        //
+        //     // 2. 计算护甲减伤
+        //     // 伤害计算公式可以有很多种，这里用一种常见的： 伤害 = 原始伤害 * (1 - 护甲值)
+        //     float finalDamage = rawDamage * (1 - Armor);
+        //     if (finalDamage < 0) finalDamage = 0; // 避免护甲为负时反而加血
+        //
+        //     // 3. 扣除生命值
+        //     CurrentHealth -= finalDamage;
+        //     Debug.Log($"受到 {finalDamage} 点伤害, 剩余生命: {CurrentHealth}");
+        //
+        //     // 4. 触发事件，通知UI等其他系统
+        //     OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
+        //
+        //     // 5. 检查死亡
+        //     if (CurrentHealth <= 0)
+        //     {
+        //         CurrentHealth = 0;
+        //         Die();
+        //     }
+        // }
+        //
+        // /// <summary>
+        // /// 角色恢复生命
+        // /// </summary>
+        // /// <param name="amount">恢复量</param>
+        // public void Heal(float amount)
+        // {
+        //     CurrentHealth += amount;
+        //     // 确保生命值不会超过上限
+        //     if (CurrentHealth > MaxHealth)
+        //     {
+        //         CurrentHealth = MaxHealth;
+        //     }
+        //
+        //     OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
+        // }
 
-        // 当角色死亡时触发
-        public Action OnDied;
-
-        void Awake()
-        {
-            // 初始化时，将当前生命值设为最大生命值
-            CurrentHealth = MaxHealth;
-        }
-
-        /// <summary>
-        /// 角色受到伤害的统一处理方法
-        /// </summary>
-        /// <param name="rawDamage">原始伤害值</param>
-        public void TakeDamage(float rawDamage)
-        {
-            // 1. 计算闪避
-            if (UnityEngine.Random.value < DodgeChance)
-            {
-                Debug.Log("伤害被闪避!");
-                return; // 闪避成功，不承受伤害
-            }
-
-            // 2. 计算护甲减伤
-            // 伤害计算公式可以有很多种，这里用一种常见的： 伤害 = 原始伤害 * (1 - 护甲值)
-            float finalDamage = rawDamage * (1 - Armor);
-            if (finalDamage < 0) finalDamage = 0; // 避免护甲为负时反而加血
-
-            // 3. 扣除生命值
-            CurrentHealth -= finalDamage;
-            Debug.Log($"受到 {finalDamage} 点伤害, 剩余生命: {CurrentHealth}");
-
-            // 4. 触发事件，通知UI等其他系统
-            OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
-
-            // 5. 检查死亡
-            if (CurrentHealth <= 0)
-            {
-                CurrentHealth = 0;
-                Die();
-            }
-        }
-
-        /// <summary>
-        /// 角色恢复生命
-        /// </summary>
-        /// <param name="amount">恢复量</param>
-        public void Heal(float amount)
-        {
-            CurrentHealth += amount;
-            // 确保生命值不会超过上限
-            if (CurrentHealth > MaxHealth)
-            {
-                CurrentHealth = MaxHealth;
-            }
-
-            OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
-        }
-
-        private void Die()
-        {
-            Debug.Log("角色死亡!");
-            OnDied?.Invoke();
-            // 在这里可以添加死亡动画、禁用玩家输入等逻辑
-            gameObject.SetActive(false);
-        }
     }
 }

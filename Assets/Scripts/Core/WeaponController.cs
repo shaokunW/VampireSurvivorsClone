@@ -77,10 +77,8 @@ namespace Vampire
                 float finalAngle = launcher.angleOffset +
                                    UnityEngine.Random.Range(-launcher.randomSpread, launcher.randomSpread);
                 Vector2 bulletDirection = Quaternion.Euler(0, 0, finalAngle) * fireDirection;
-
                 // 调用子弹管理器生成子弹
-                // BulletManager.Instance.SpawnBullet(launcher.bulletId, transform.position, bulletDirection, ownerStats);
-                Debug.DrawRay(transform.position, bulletDirection * 5, Color.cyan, 0.1f);
+                BulletManager.Instance.SpawnBullet(launcher.bulletId, transform.position, bulletDirection);
             }
 
             // 使用外部计算好的值来重置冷却

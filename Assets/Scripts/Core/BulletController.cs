@@ -111,7 +111,8 @@ namespace Vampire
             if (target.TryGetComponent<CharacterStats>(out var targetStats))
             {
                 // 这里可以加入更复杂的伤害计算，比如结合创建者的属性
-                targetStats.TakeDamage(data.baseDamage);
+                
+                // targetStats.TakeDamage(data.baseDamage);
             }
 
             // 处理生命窃取
