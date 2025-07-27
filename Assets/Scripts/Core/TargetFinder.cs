@@ -13,15 +13,9 @@ namespace Vampire
         [SerializeField] private int queueSize = 10;
         [Tooltip("需要搜索的目标图层列表")]
         [SerializeField] private LayerMask layerMask;
-        public List<Transform> CurrentTargets { get; set; }
+        public List<Transform> CurrentTargets = new List<Transform>();
 
-        private PriorityQueue<Transform, float> _priorityQueue;
-
-        void Awake()
-        {
-            CurrentTargets = new List<Transform>();
-            _priorityQueue = new PriorityQueue<Transform, float>();
-        }
+        private PriorityQueue<Transform, float> _priorityQueue = new PriorityQueue<Transform, float>();
 
         void Update()
         {
@@ -30,10 +24,9 @@ namespace Vampire
 
         private void FindNearestTargetsInRadius()
         {
-            Debug.Log($"start find");
             CurrentTargets.Clear();
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, searchRadius, layerMask);
-            Debug.Log($"colliders.Length={colliders.Length}");
+            // Debug.Log($"colliders.Length={colliders.Length}");
             if (colliders.Length > 0)
             {
                 _priorityQueue.Clear();
@@ -56,6 +49,11 @@ namespace Vampire
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, searchRadius);
+        }
+
+        public LayerMask GetLayerMask()
+        {
+            return layerMask;
         }
     }
 }

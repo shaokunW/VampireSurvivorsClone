@@ -37,10 +37,10 @@ namespace Vampire
         [Tooltip("基础生命窃取概率 (0-100)")] [Range(0, 100)]
         public int baseLifestealChance = 0;
 
-        [Header("目标阵营")] [Tooltip("是否能对玩家造成伤害")]
-        public bool canHitPlayer = false;
-
-        [Tooltip("是否能对敌人造成伤害")] public bool canHitEnemy = true;
+        // [Header("目标阵营")] [Tooltip("是否能对玩家造成伤害")]
+        // public bool canHitPlayer = false;
+        //
+        // [Tooltip("是否能对敌人造成伤害")] public bool canHitEnemy = true;
 
         [Header("移动轨迹")] [Tooltip("子弹的移动模式")] public MovementPattern movementPattern;
 
@@ -48,6 +48,10 @@ namespace Vampire
 
         [Tooltip("仅用于某些移动模式的额外参数(如波浪频率、追踪强度、回旋时间等)")]
         public float movementParameter = 1f;
+
+        public float startWidth;
+        
+        public float endWidth;
 
         // [Header("命中效果")]
         // [Tooltip("子弹命中目标时触发的特殊效果列表")]
