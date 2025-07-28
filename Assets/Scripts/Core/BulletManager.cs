@@ -12,6 +12,7 @@ namespace Vampire
         [SerializeField] public GameObject bulletPrefab;
         private Dictionary<string, AsyncOperationHandle<BulletData>> _bulletDataHandlesCache;
         private Dictionary<AssetReferenceSprite, AsyncOperationHandle<Sprite>> _bulletSpriteHandlesCache;
+
         void Awake()
         {
             if (!Instance)
@@ -27,7 +28,11 @@ namespace Vampire
             }
         }
 
-        public async void SpawnBullet(string bulletId, Vector2 startPos, Vector2 bulletDirection, LayerMask LayerMask, float maxDistance)
+        public async void SpawnBullet(string bulletId,
+            Vector2 startPos,
+            Vector2 bulletDirection,
+            LayerMask LayerMask,
+            float maxDistance, BulletAbility abilitie)
         {
             Debug.DrawRay(startPos, bulletDirection * 5, Color.cyan, 0.1f);
             var handle = GetOrLoadData(bulletId);
@@ -42,7 +47,8 @@ namespace Vampire
             BulletData data = handle.Result;
             var bulletObject = Instantiate(bulletPrefab, startPos, Quaternion.identity);
             BulletController controller = bulletObject.GetComponent<BulletController>();
-            controller.Initialize(data, null, startPos, bulletDirection, LayerMask, maxDistance, new DebugBulletAbility());
+            controller.Initialize(data, null, startPos, bulletDirection, LayerMask, maxDistance,
+                abilitie);
             // INIT EFFECT
             // --- 2. 异步加载视觉资源 ---
             // 检查 data.graphics 是否是一个有效的引用
@@ -51,7 +57,7 @@ namespace Vampire
             await spriteHandle.Task;
             if (spriteHandle.Status == AsyncOperationStatus.Succeeded)
             {
-                    spriteRenderer.sprite = spriteHandle.Result;
+                spriteRenderer.sprite = spriteHandle.Result;
             }
             else
             {
@@ -59,7 +65,6 @@ namespace Vampire
                 spriteRenderer.sprite = null;
                 Debug.LogWarning($"Bullet '{data.graphicsId}' 的 Graphics 未指定或无效。");
             }
-            
         }
 
         private AsyncOperationHandle<BulletData> GetOrLoadData(string bulletId)
@@ -83,15 +88,13 @@ namespace Vampire
             }
 
             // 如果没有，则开始异步加载，并将操作句柄存入缓存
-            var newHandle =  graphicId.LoadAssetAsync<Sprite>();
+            var newHandle = graphicId.LoadAssetAsync<Sprite>();
             _bulletSpriteHandlesCache[graphicId] = newHandle;
             return newHandle;
         }
-
-
     }
-    
-    class DebugBulletAbility: BulletAbility
+
+    class DebugBulletAbility : BulletAbility
     {
         public void OnMove(IBulletOwner owner, Transform pos)
         {
@@ -108,7 +111,6 @@ namespace Vampire
             {
                 Debug.Log("OnDestroy");
             }
-
         }
     }
 }

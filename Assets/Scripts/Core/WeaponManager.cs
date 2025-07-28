@@ -84,7 +84,8 @@ namespace Vampire
                             float finalFireInterval = attackSpeed(weapon);
                             Debug.Log(("start fire"));
                             // 6. 【命令】命令武器开火，并把计算好的冷却时间传给它
-                            weapon.Fire(directionToTarget, finalFireInterval, targetFinder.GetLayerMask(), finalAttackRange);
+                            DamageAbility damage = new DamageAbility(1,1,1);
+                            weapon.Fire(directionToTarget, finalFireInterval, targetFinder.GetLayerMask(), finalAttackRange, damage);
                         }
                     }
                 }
