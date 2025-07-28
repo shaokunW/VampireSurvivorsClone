@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Vampire
 {
@@ -22,7 +23,7 @@ namespace Vampire
         public string bulletId;
 
         [Tooltip("子弹的外观资源ID (用于从资源管理器或对象池加载)")]
-        public string graphicsId;
+        public AssetReferenceSprite graphicsId;
 
         [Header("物理属性")] [Tooltip("子弹的基础碰撞半径")]
         public float baseRadius = 0.5f;

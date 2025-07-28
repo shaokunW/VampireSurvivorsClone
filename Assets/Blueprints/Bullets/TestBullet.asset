@@ -13,14 +13,19 @@ MonoBehaviour:
   m_Name: TestBullet
   m_EditorClassIdentifier: 
   bulletId: TestBullet
-  graphicsId: TestBulletSpirit
+  graphicsId:
+    m_AssetGUID: 8aa8c4cb76e054949bb308e463d0f9c2
+    m_SubObjectName: Shuriken
+    m_SubObjectType: UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+    m_EditorAssetChanged: 1
   baseRadius: 0.5
   baseDurability: 1
   baseLifetime: 5
   baseDamage: 10
   baseLifestealChance: 0
-  canHitPlayer: 0
-  canHitEnemy: 1
   movementPattern: 0
   baseSpeed: 10
   movementParameter: 1
+  startWidth: 0
+  endWidth: 0

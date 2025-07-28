@@ -68,7 +68,7 @@ namespace Vampire
         /// </summary>
         /// <param name="fireDirection">由管理器计算好的发射方向</param>
         /// <param name="nextCooldown">由管理器计算好的下一次开火的冷却时间</param>
-        public void Fire(Vector2 fireDirection, float nextCooldown, LayerMask layerMask)
+        public void Fire(Vector2 fireDirection, float nextCooldown, LayerMask layerMask, float maxDistance)
         {
             if (animator != null) animator.SetTrigger("Fire");
 
@@ -78,7 +78,8 @@ namespace Vampire
                                    UnityEngine.Random.Range(-launcher.randomSpread, launcher.randomSpread);
                 Vector2 bulletDirection = Quaternion.Euler(0, 0, finalAngle) * fireDirection;
                 // 调用子弹管理器生成子弹
-                BulletManager.Instance.SpawnBullet(launcher.bulletId, transform.position, bulletDirection, layerMask);
+                BulletManager.Instance.SpawnBullet(launcher.bulletId, transform.position, bulletDirection,
+                    layerMask, maxDistance);
             }
 
             // 使用外部计算好的值来重置冷却

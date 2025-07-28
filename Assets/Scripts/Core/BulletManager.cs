@@ -11,13 +11,14 @@ namespace Vampire
         public static BulletManager Instance { get; private set; }
         [SerializeField] public GameObject bulletPrefab;
         private Dictionary<string, AsyncOperationHandle<BulletData>> _bulletDataHandlesCache;
-
+        private Dictionary<AssetReferenceSprite, AsyncOperationHandle<Sprite>> _bulletSpriteHandlesCache;
         void Awake()
         {
             if (!Instance)
             {
                 Instance = this;
                 _bulletDataHandlesCache = new Dictionary<string, AsyncOperationHandle<BulletData>>();
+                _bulletSpriteHandlesCache = new Dictionary<AssetReferenceSprite, AsyncOperationHandle<Sprite>>();
                 DontDestroyOnLoad(gameObject);
             }
             else if (Instance != this)
@@ -26,17 +27,7 @@ namespace Vampire
             }
         }
 
-        // Start is called before the first frame update
-        void Start()
-        {
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-        }
-
-        public async void SpawnBullet(string bulletId, Vector2 startPos, Vector2 bulletDirection, LayerMask LayerMask)
+        public async void SpawnBullet(string bulletId, Vector2 startPos, Vector2 bulletDirection, LayerMask LayerMask, float maxDistance)
         {
             Debug.DrawRay(startPos, bulletDirection * 5, Color.cyan, 0.1f);
             var handle = GetOrLoadData(bulletId);
@@ -47,10 +38,28 @@ namespace Vampire
                 return;
             }
 
+            // INIT TRIGGER
             BulletData data = handle.Result;
-            BulletController controller =
-                Instantiate(bulletPrefab, Instance.transform).GetComponent<BulletController>();
-            controller.Initialize(data, startPos, bulletDirection, LayerMask);
+            var bulletObject = Instantiate(bulletPrefab, startPos, Quaternion.identity);
+            BulletController controller = bulletObject.GetComponent<BulletController>();
+            controller.Initialize(data, null, startPos, bulletDirection, LayerMask, maxDistance, new DebugBulletAbility());
+            // INIT EFFECT
+            // --- 2. 异步加载视觉资源 ---
+            // 检查 data.graphics 是否是一个有效的引用
+            var spriteRenderer = bulletObject.GetComponent<SpriteRenderer>();
+            var spriteHandle = GetOrLoadSprite(data.graphicsId);
+            await spriteHandle.Task;
+            if (spriteHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                    spriteRenderer.sprite = spriteHandle.Result;
+            }
+            else
+            {
+                // 如果没有指定图形，可以设置一个默认或清空
+                spriteRenderer.sprite = null;
+                Debug.LogWarning($"Bullet '{data.graphicsId}' 的 Graphics 未指定或无效。");
+            }
+            
         }
 
         private AsyncOperationHandle<BulletData> GetOrLoadData(string bulletId)
@@ -64,6 +73,42 @@ namespace Vampire
             AsyncOperationHandle<BulletData> newHandle = Addressables.LoadAssetAsync<BulletData>(bulletId);
             _bulletDataHandlesCache[bulletId] = newHandle;
             return newHandle;
+        }
+
+        private AsyncOperationHandle<Sprite> GetOrLoadSprite(AssetReferenceSprite graphicId)
+        {
+            if (_bulletSpriteHandlesCache.TryGetValue(graphicId, out AsyncOperationHandle<Sprite> handle))
+            {
+                return handle;
+            }
+
+            // 如果没有，则开始异步加载，并将操作句柄存入缓存
+            var newHandle =  graphicId.LoadAssetAsync<Sprite>();
+            _bulletSpriteHandlesCache[graphicId] = newHandle;
+            return newHandle;
+        }
+
+
+    }
+    
+    class DebugBulletAbility: BulletAbility
+    {
+        public void OnMove(IBulletOwner owner, Transform pos)
+        {
+            Debug.Log("OnMove");
+        }
+
+        public void OnHit(IBulletOwner owner, Collider2D hitTarget, Transform hitPoint)
+        {
+            if (hitTarget != null)
+            {
+                Debug.Log("OnHit");
+            }
+            else
+            {
+                Debug.Log("OnDestroy");
+            }
+
         }
     }
 }
