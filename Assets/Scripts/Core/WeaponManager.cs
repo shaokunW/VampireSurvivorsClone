@@ -9,26 +9,116 @@ namespace Vampire
     [ExecuteInEditMode]
     public class WeaponManager : MonoBehaviour
     {
-        // --- 引用 ---
+        // --- From WeaponSlotsInitializer ---
+        [Header("Slot Configuration")]
+        public int slotsCount = 1;
+        public float distributionRadius = 0.5f;
+        private const string ParentName = "WeaponSlotParent";
+        private int _previousSlotsCount = -1;
+        private float _previousDistributionRadius = -1.0f;
+
+        // --- Original WeaponManager fields ---
         [Header("配置")]
         [Tooltip("角色的初始武器列表")]
-        [SerializeField] private List<WeaponData> debugWeapons;
+        [SerializeField]
+        private List<WeaponData> debugWeapons;
+
         [Tooltip("所有武器共用的基础预制体，必须挂载有WeaponController脚本")]
-        [SerializeField] private GameObject weaponPrefab;
+        [SerializeField]
+        private GameObject weaponPrefab;
 
         [SerializeField] public List<Transform> WeaponSlots; // 武器挂点
-        // public CharacterStats ownerStats;
+
         [SerializeField] private TargetFinder targetFinder;
 
-        // --- 运行时数据 ---
         public List<WeaponController> equippedWeapons = new List<WeaponController>();
-        
-        
+
         void OnValidate()
         {
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.delayCall += LoadWeaponsToSlots;
+            // Check if slot configuration has changed
+            if (slotsCount != _previousSlotsCount || !Mathf.Approximately(distributionRadius, _previousDistributionRadius))
+            {
+                // Use delayCall to avoid issues with modifying hierarchy during OnValidate
+                UnityEditor.EditorApplication.delayCall += () =>
+                {
+                    if (this != null && this.gameObject != null)
+                    {
+                        GenerateSlots();
+                        _previousSlotsCount = slotsCount;
+                        _previousDistributionRadius = distributionRadius;
+                        LoadWeaponsToSlots(); // Reload weapons after regenerating slots
+                    }
+                };
+            }
+            else
+            {
+                 LoadWeaponsToSlots();
+            }
+#else
+            // Runtime behavior
+            LoadWeaponsToSlots();
 #endif
+        }
+
+        private void GenerateSlots()
+        {
+            var parentTransform = GetOrInitSlotParent();
+            CleanupSlots(parentTransform);
+
+            if (slotsCount < 1)
+            {
+                WeaponSlots = new List<Transform>();
+                return;
+            }
+
+            var slots = new List<Transform>();
+            float angleStep = 360f / slotsCount;
+
+            for (int i = 0; i < slotsCount; i++)
+            {
+                float degrees = i * angleStep;
+                float radians = degrees * Mathf.Deg2Rad;
+
+                float x = Mathf.Cos(radians) * distributionRadius;
+                float y = Mathf.Sin(radians) * distributionRadius;
+                
+                var slot = new GameObject("WeaponSlot_" + (i + 1));
+                slot.transform.SetParent(parentTransform);
+                slot.transform.localPosition = new Vector3(x, y, 0);
+                slot.transform.localRotation = Quaternion.identity;
+                slots.Add(slot.transform);
+            }
+            this.WeaponSlots = slots; // Directly assign to the local list
+        }
+
+        private Transform GetOrInitSlotParent()
+        {
+            var parentTransform = transform.Find(ParentName);
+            if (parentTransform == null)
+            {
+                GameObject p = new GameObject(ParentName);
+                p.transform.SetParent(transform);
+                p.transform.localPosition = Vector3.zero;
+                p.transform.localRotation = Quaternion.identity;
+                parentTransform = p.transform;
+            }
+            return parentTransform;
+        }
+
+        private void CleanupSlots(Transform parentTransform)
+        {
+            for (int i = parentTransform.childCount - 1; i >= 0; i--)
+            {
+                var child = parentTransform.GetChild(i);
+                if (child.name.StartsWith("WeaponSlot_"))
+                {
+#if UNITY_EDITOR
+                    // In the editor, DestroyImmediate must be used for objects
+                    DestroyImmediate(child.gameObject);
+#endif
+                }
+            }
         }
 
         private void LoadWeaponsToSlots()
@@ -38,54 +128,61 @@ namespace Vampire
                 Debug.LogError("weapon Prefab is null");
                 return;
             }
+            // Ensure WeaponSlots is not null before proceeding
+            if (WeaponSlots == null) return;
+
+            // Clean existing weapons from slots
             foreach (var slot in WeaponSlots)
             {
-                CleanWeaponSlotImmediate(slot);
+                if (slot != null) // The slot might have been destroyed
+                   CleanWeaponSlotImmediate(slot);
             }
+
             equippedWeapons.Clear();
             int cnt = Mathf.Min(debugWeapons.Count, WeaponSlots.Count);
-            Debug.Log($"LoadWeaponsToSlots {debugWeapons.Count} {WeaponSlots.Count}");
 
             for (int i = 0; i < cnt; i++)
             {
                 Transform currentSlot = WeaponSlots[i];
+                if (currentSlot == null) continue; // Skip if slot is somehow null
+
                 WeaponData currentData = debugWeapons[i];
-                equippedWeapons.Add(addToSlot(currentData, currentSlot));
+                if (currentData == null)
+                {
+                    Debug.Log("Weapon data is null");
+                }
+                else
+                {
+                    equippedWeapons.Add(addToSlot(currentData, currentSlot));
+                }
             }
         }
 
         void Update()
         {
-            // 获取当前目标
+            // The rest of the Update method remains the same...
             List<Transform> currentTargets = targetFinder.CurrentTargets;
             Transform currentTarget = currentTargets.FirstOrDefault();
 
-            // --- 统一的武器驱动循环 ---
             foreach (var weapon in equippedWeapons)
             {
-                // 1. 每帧更新武器的冷却
                 weapon.TickCooldown(Time.deltaTime);
 
-                // 2. 如果有目标，命令武器瞄准
                 if (currentTarget != null)
                 {
                     Vector2 directionToTarget = (currentTarget.position - weapon.transform.position).normalized;
                     weapon.Aim(directionToTarget);
 
-                    // 3. 检查武器是否可以开火
                     if (weapon.CanFire())
                     {
-                        Debug.Log(("start fire"));
-                        // 4. 【决策】在这里进行射程检查
-                        float finalAttackRange = attackRange(weapon); 
+                        float finalAttackRange = attackRange(weapon);
+
                         if (Vector2.Distance(weapon.transform.position, currentTarget.position) <= finalAttackRange)
                         {
-                            // 5. 【决策】在这里计算最终的冷却时间
                             float finalFireInterval = attackSpeed(weapon);
-                            Debug.Log(("start fire"));
-                            // 6. 【命令】命令武器开火，并把计算好的冷却时间传给它
-                            DamageAbility damage = new DamageAbility(1,1,1);
-                            weapon.Fire(directionToTarget, finalFireInterval, targetFinder.GetLayerMask(), finalAttackRange, damage);
+                            DamageAbility damage = new DamageAbility(1, 1, 1);
+                            weapon.Fire(directionToTarget, finalFireInterval, targetFinder.GetLayerMask(),
+                                finalAttackRange, damage);
                         }
                     }
                 }
@@ -94,20 +191,14 @@ namespace Vampire
 
         public float attackRange(WeaponController weapon)
         {
-            return weapon.Data.baseAttackRange;
-            // return weapon.Data.baseAttackRange * (1 + ownerStats.Range);
+            return weapon.data.baseAttackRange;
         }
 
         public float attackSpeed(WeaponController weapon)
         {
-            return weapon.Data.baseFireInterval;
-            // return weapon.Data.baseFireInterval / (1 + ownerStats.AttackSpeed);
-
+            return weapon.data.baseFireInterval;
         }
 
-        /// <summary>
-        /// 装备一把新武器
-        /// </summary>
         public void EquipWeapon(WeaponData weaponData)
         {
             foreach (Transform slot in WeaponSlots)
@@ -122,34 +213,29 @@ namespace Vampire
 
         private WeaponController addToSlot(WeaponData weapon, Transform slot)
         {
-            // --- 调试步骤 1: 检查参数 ---
             if (slot == null)
             {
-                Debug.LogError("错误：尝试附加武器到的 'slot' 为空 (null)！");
-                return null; // 或者做其他错误处理
-            }
-            if (weaponPrefab == null)
-            {
-                Debug.LogError("错误：'weaponPrefab' 未在 Inspector 中指定！");
+                Debug.LogError("Error: 'slot' to attach weapon to is null!");
                 return null;
             }
 
-            Debug.Log($"正在将武器附加到 '{slot.name}'...", slot.gameObject); // 点击这条日志可以在Hierarchy中高亮slot
+            if (weapon == null)
+            {
+                Debug.LogError("weapon data is null");
+                return null;
+            }
+
+            if (weaponPrefab == null)
+            {
+                Debug.LogError("Error: 'weaponPrefab' not specified in Inspector!");
+                return null;
+            }
 
             GameObject weaponObj = Instantiate(weaponPrefab, slot.position, slot.rotation, slot);
             weaponObj.name = "Weapon_" + weapon.weaponID;
-            // --- 调试步骤 2: 验证父子关系 ---
-            if (weaponObj.transform.parent == slot)
-            {
-                Debug.Log($"成功将 '{weaponObj.name}' 设置为 '{slot.name}' 的子物体。", weaponObj);
-            }
-            else
-            {
-                Debug.LogError($"未能将 '{weaponObj.name}' 设置为 '{slot.name}' 的子物体。当前的父物体是: " + (weaponObj.transform.parent != null ? weaponObj.transform.parent.name : "null"));
-            }
-    
+
             WeaponController wc = weaponObj.GetComponent<WeaponController>();
-            wc.Initialize(weapon); 
+            wc.Initialize(weapon);
             return wc;
         }
 
@@ -160,7 +246,6 @@ namespace Vampire
                 var child = slot.GetChild(i);
                 if (child.name.StartsWith("Weapon"))
                 {
-                    // 在编辑器脚本中必须使用DestroyImmediate
                     DestroyImmediate(child.gameObject);
                 }
             }

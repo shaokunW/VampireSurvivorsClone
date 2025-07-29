@@ -9,7 +9,7 @@ namespace Vampire
     public class WeaponController : MonoBehaviour
     {
         // --- 引用 ---
-        private WeaponData weaponData;
+        public WeaponData data;
         private Animator animator;
         private SpriteRenderer spriteRenderer;
 
@@ -17,14 +17,12 @@ namespace Vampire
         private float fireCountdown;
 
         // --- 公共属性查询 ---
-        public WeaponData Data => weaponData; // 允许外部查询武器的静态数据，例如基础射程
-
         /// <summary>
         /// 初始化武器，只关联静态数据。
         /// </summary>
         public void Initialize(WeaponData data)
         {
-            this.weaponData = data;
+            this.data = data;
             this.animator = GetComponent<Animator>();
             this.spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -40,7 +38,6 @@ namespace Vampire
                 this.animator.runtimeAnimatorController = data.animatorController;
                 Debug.Log("configure animatorController");
             }
-
         }
 
         /// <summary>
@@ -68,19 +65,20 @@ namespace Vampire
         /// </summary>
         /// <param name="fireDirection">由管理器计算好的发射方向</param>
         /// <param name="nextCooldown">由管理器计算好的下一次开火的冷却时间</param>
-        public void Fire(Vector2 fireDirection, float nextCooldown, LayerMask layerMask, float maxDistance, DamageAbility ability)
+        public void Fire(Vector2 fireDirection, float nextCooldown, LayerMask layerMask, float maxDistance,
+            DamageAbility ability)
         {
             // ability.AddDamage(weaponData.);
             if (animator != null) animator.SetTrigger("Fire");
 
-            foreach (var launcher in weaponData.bulletLaunchers)
+            foreach (var launcher in data.bulletLaunchers)
             {
                 float finalAngle = launcher.angleOffset +
                                    UnityEngine.Random.Range(-launcher.randomSpread, launcher.randomSpread);
                 Vector2 bulletDirection = Quaternion.Euler(0, 0, finalAngle) * fireDirection;
                 // 调用子弹管理器生成子弹
                 BulletManager.Instance.SpawnBullet(launcher.bulletId, transform.position, bulletDirection,
-                    layerMask, maxDistance,  ability);
+                    layerMask, maxDistance, ability);
             }
 
             // 使用外部计算好的值来重置冷却
