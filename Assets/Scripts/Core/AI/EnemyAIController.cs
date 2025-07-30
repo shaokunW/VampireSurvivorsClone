@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using Unity.VisualScripting;
+using UnityEngine;
 using Vampire.AI;
 
 namespace Vampire
@@ -27,12 +29,16 @@ namespace Vampire
         private Rigidbody2D _rb;
         private TargetFinder _targetFinder;
         private StatsController _statsController;
+        public event Action<EnemyAIController> OnDeactivated;
 
         void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
             _targetFinder = GetComponent<TargetFinder>();
             _statsController = GetComponent<StatsController>();
+            // controlled by script
+            _rb.isKinematic = true;
+
         }
 
         void Start()
@@ -100,8 +106,11 @@ namespace Vampire
         {
             if (_movementTarget != null)
             {
-                Vector2 direction = (_movementTarget - (Vector2)transform.position).normalized;
-                _rb.velocity = direction * baseSpeed * _currentSpeedMultiplier;
+                float finalSpeed = baseSpeed * _currentSpeedMultiplier;
+                // 计算当前帧能移动的最大距离
+                float step = finalSpeed * Time.fixedDeltaTime; 
+                // 使用 MoveTowards 来更新位置
+                transform.position = Vector2.MoveTowards(transform.position, _movementTarget, step);
             }
         }
 

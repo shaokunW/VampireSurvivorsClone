@@ -7,7 +7,7 @@ namespace Vampire
     [RequireComponent(typeof(CircleCollider2D), typeof(SpriteRenderer))] // 确保有碰撞体
     public class BulletController : MonoBehaviour
     {
-        // --- 引用 ---
+        public event Action<BulletController> OnDeactivated;
         private RaycastHit2D[] _hitsCache = new RaycastHit2D[16]; // 假设最多同时命中16个目标
         private CircleCollider2D circleCollider;
         private float _startWidth;
@@ -52,14 +52,16 @@ namespace Vampire
             this.fromPosition = startPos;
             this.owner = owner;
             this.layerMask = layerMask;
+            
+            
             // 根据创建者属性计算最终数值
             circleCollider.radius = data.baseRadius;
             this.ability = ability;
             this._initialMaxDistance = maxDistance;
-            
             this._traveledDistance = 0;
+            transform.position = startPos;
+            transform.right = velocity.normalized; // 让子弹头朝向移动方向
             hitSet.Clear();
-            gameObject.SetActive(true);
         }
 
         void FixedUpdate()
@@ -133,8 +135,8 @@ namespace Vampire
 
         private void DestroyBullet()
         {
-            gameObject.SetActive(false);
             ability?.OnHit(owner, null, null);
+            OnDeactivated?.Invoke(this);
         }
     }
 }

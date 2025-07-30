@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Pool;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Vampire
@@ -12,6 +13,7 @@ namespace Vampire
         [SerializeField] public GameObject bulletPrefab;
         private Dictionary<string, AsyncOperationHandle<BulletData>> _bulletDataHandlesCache;
         private Dictionary<AssetReferenceSprite, AsyncOperationHandle<Sprite>> _bulletSpriteHandlesCache;
+        private ObjectPool<BulletController> _bulletPool;
 
         void Awake()
         {
@@ -20,6 +22,20 @@ namespace Vampire
                 Instance = this;
                 _bulletDataHandlesCache = new Dictionary<string, AsyncOperationHandle<BulletData>>();
                 _bulletSpriteHandlesCache = new Dictionary<AssetReferenceSprite, AsyncOperationHandle<Sprite>>();
+                _bulletPool = new ObjectPool<BulletController>(
+                    createFunc: () =>
+                    {
+                        var o = Instantiate(bulletPrefab);
+                        var controller = o.GetComponent<BulletController>();
+                        controller.OnDeactivated += _bulletPool.Release;
+                        return controller;
+                    },
+                    actionOnGet: (controller) => controller.gameObject.SetActive(true),
+                    actionOnRelease: (controller) => controller.gameObject.SetActive(false),
+                    actionOnDestroy: (controller) => Destroy(controller.gameObject),
+                    collectionCheck: true,
+                    defaultCapacity: 1000,
+                    maxSize: 1000);
                 DontDestroyOnLoad(gameObject);
             }
             else if (Instance != this)
@@ -32,7 +48,7 @@ namespace Vampire
             Vector2 startPos,
             Vector2 bulletDirection,
             LayerMask LayerMask,
-            float maxDistance, BulletAbility abilitie)
+            float maxDistance, BulletAbility abilitiy)
         {
             Debug.DrawRay(startPos, bulletDirection * 5, Color.cyan, 0.1f);
             var handle = GetOrLoadData(bulletId);
@@ -45,10 +61,13 @@ namespace Vampire
 
             // INIT TRIGGER
             BulletData data = handle.Result;
-            var bulletObject = Instantiate(bulletPrefab, startPos, Quaternion.identity);
+            var bulletObject = GetFromPool(startPos, Quaternion.identity);
             BulletController controller = bulletObject.GetComponent<BulletController>();
+#if UNITY_EDITOR
+            controller.gameObject.name = $"Bullet_{data.bulletId}";
+#endif
             controller.Initialize(data, null, startPos, bulletDirection, LayerMask, maxDistance,
-                abilitie);
+                abilitiy);
             // INIT EFFECT
             // --- 2. 异步加载视觉资源 ---
             // 检查 data.graphics 是否是一个有效的引用
@@ -92,25 +111,13 @@ namespace Vampire
             _bulletSpriteHandlesCache[graphicId] = newHandle;
             return newHandle;
         }
-    }
 
-    class DebugBulletAbility : BulletAbility
-    {
-        public void OnMove(IBulletOwner owner, Transform pos)
+        private BulletController GetFromPool(Vector2 pos, Quaternion quaternion)
         {
-            Debug.Log("OnMove");
-        }
-
-        public void OnHit(IBulletOwner owner, Collider2D hitTarget, Transform hitPoint)
-        {
-            if (hitTarget != null)
-            {
-                Debug.Log("OnHit");
-            }
-            else
-            {
-                Debug.Log("OnDestroy");
-            }
+            var o = _bulletPool.Get();
+            o.transform.rotation = quaternion;
+            o.transform.position = pos;
+            return o;
         }
     }
 }

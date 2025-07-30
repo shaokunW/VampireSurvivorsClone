@@ -1,10 +1,9 @@
-﻿using UnityEngine;
+﻿using Unity.VisualScripting;
+using UnityEngine;
 
 namespace Vampire.AI
 {
-    /// <summary>
-    /// 所有AI行为数据资产的抽象基类
-    /// </summary>
+    
     public abstract class AIBehavior : ScriptableObject
     {
         [Header("通用行为参数")]
