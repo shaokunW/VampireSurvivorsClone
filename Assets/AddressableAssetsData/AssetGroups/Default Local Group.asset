@@ -22,8 +22,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 530a8267844501f4abcc5da27665ee0d
+    m_Address: TestEnemy
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8aa8c4cb76e054949bb308e463d0f9c2
     m_Address: Assets/Sprites/Weapons/Shuriken.png
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1934d8b81b1b463789e100d3936db4f
+    m_Address: Assets/Sprites/Monsters/Boss.png
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -47,6 +47,7 @@ GameObject:
   - component: {fileID: 939347496789037781}
   - component: {fileID: 8800710216785378734}
   - component: {fileID: 2753335185615381546}
+  - component: {fileID: -6144274446740291387}
   m_Layer: 12
   m_Name: EnemyPrefab
   m_TagString: Untagged
@@ -174,7 +175,7 @@ MonoBehaviour:
   debugWeapons: []
   weaponPrefab: {fileID: 1052750645412336999, guid: 9bee67e19a0ec7e418025f2fd13e4365, type: 3}
   WeaponSlots:
-  - {fileID: 5804161135916137154}
+  - {fileID: 0}
   targetFinder: {fileID: 6549089423997682460}
   equippedWeapons: []
 --- !u!114 &6549089423997682460
@@ -251,6 +252,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   aiProfile: {fileID: 11400000, guid: 7ab02cdf3c304ae4faa2dad93f429f1c, type: 2}
   baseSpeed: 3
+--- !u!114 &-6144274446740291387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4040672659042373087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b142cc4bae36f04cb85aaf9f1495483, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6514815392094503143
 GameObject:
   m_ObjectHideFlags: 0
