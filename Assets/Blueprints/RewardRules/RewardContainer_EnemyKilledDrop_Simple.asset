@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a45123498428bf54b856d11ab732a99d, type: 3}
+  m_Name: RewardContainer_EnemyKilledDrop_Simple
+  m_EditorClassIdentifier: 
+  id: 1
+  slots:
+  - Weight: 10
+    Cnt: 0
+    ItemId: -1
+    isContainer: 0
+  - Weight: 90
+    Cnt: 1
+    ItemId: 0
+    isContainer: 0

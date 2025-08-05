@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ab4eecdd4cd4cde892296d899096e44, type: 3}
+  m_Name: Item_Collect_Gold_Exp_1
+  m_EditorClassIdentifier: 
+  id: 1
+  name: "\u7B80\u5355\u6750\u6599"
+  desc: 'Gold '
+  basePrice: 0
+  maxStack: 1
+  effects:
+  - {fileID: 11400000, guid: 8b9db7324b4880c4798d218889136585, type: 2}
+  - {fileID: 11400000, guid: 3afd9819a205e8c41996f029d0d4d107, type: 2}
+  graphicsId:
+    m_AssetGUID: 296af48805bcd4f9ba29455452574e29
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
